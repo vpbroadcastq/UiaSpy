@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "UiaSpy (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "UiaSpy (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
