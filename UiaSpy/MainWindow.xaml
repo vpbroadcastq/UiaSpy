@@ -13,6 +13,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/> <!--Contains the TreeView -->
 		</Grid.RowDefinitions>
 		<MenuBar Grid.Row="0">
 			<MenuBarItem Title="File">
@@ -26,14 +27,26 @@
 			</MenuBarItem>
 		</MenuBar>
 		<Grid Grid.Row="1">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
+				<TextBox Grid.Column="0" Text="{x:Bind Path=ExePath.Value, Mode=TwoWay}" x:Name="pathToExe" PlaceholderText="Path to executable" AcceptsReturn="false"/>
+				<Button Grid.Column="1" x:Name="browseExePath" Click="browseButton_Click" Content="Browse..."/>
+				<Button Grid.Column="2" x:Name="launchExe" Click="launchExeButton_Click" Content="Run and attach"/>
+			</Grid>
+		</Grid>
+		<Grid Grid.Row="2">
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="400"/> <!-- TreeView -->
+				<ColumnDefinition Width="Auto"/> <!-- Element details -->
 			</Grid.ColumnDefinitions>
 			<TreeView Grid.Column="0" ItemsSource="{x:Bind Path=UiaTreeEntries, Mode=OneWay}">
 				<TreeView.ItemTemplate>
 					<DataTemplate x:DataType="models:UiaTreeEntry">
-						<TreeViewItem Content="{x:Bind Name}" ItemsSource="{x:Bind Children}"/>
+						<TreeViewItem Content="{x:Bind Name, Mode=OneWay}" ItemsSource="{x:Bind Children, Mode=OneWay}"/>
 					</DataTemplate>
 				</TreeView.ItemTemplate>
 			</TreeView>

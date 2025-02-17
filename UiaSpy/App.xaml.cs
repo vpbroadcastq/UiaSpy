@@ -41,10 +41,13 @@ namespace UiaSpy
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            m_window = new MainWindow();
+            //UiaSpy.TestUia test = new UiaSpy.TestUia();
+            m_mainApp = new UiaSpy.MainApp();
+			m_window = new MainWindow(m_mainApp);
             m_window.Activate();
         }
 
         private Window? m_window;
+        private UiaSpy.MainApp m_mainApp;
     }
 }
