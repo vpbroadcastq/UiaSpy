@@ -57,6 +57,7 @@ namespace UiaSpy
 				object selectedObj = e.AddedItems[0];
 				UiaTreeEntry selectedEntry = (UiaTreeEntry)selectedObj;
 				selectedEntry.IsSelected = true;
+				UiElement_UiaNodeDetailsListView.ItemsSource = selectedEntry.Details;
 				return;
 			}
 			else if (e.RemovedItems.Count == 1)
@@ -65,6 +66,7 @@ namespace UiaSpy
 				UiaTreeEntry selectedEntry = (UiaTreeEntry)deselectedObj;
 				selectedEntry.IsSelected = false;
 			}
+			UiElement_UiaNodeDetailsListView.ItemsSource = null;
 		}
 		private async void UiElement_BrowseExePathButton_Click(object sender, RoutedEventArgs e)
 		{

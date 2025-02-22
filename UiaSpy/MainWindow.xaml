@@ -60,9 +60,22 @@
 				</TreeView>
 			</Border>
 			<Border Grid.Column="1" BorderBrush="DarkRed" BorderThickness="2" CornerRadius="0" Padding="5">
-				<!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-					
-				</StackPanel>-->
+				<!-- Not sure it's possible to specify an ItemsSource statically; the source is different entries/sub-entries
+				of UiaTreeEntry.Details (UiaTreeEntry.Children.Details, UiaTreeEntry[3].Children.Children[2].Children.Details,
+				etc.  It's only known at runtime
+				UiaTreeEntries.DetailsItemsSource="{x:Bind Path=UiaTreeEntries.Details, Mode=OneWay}"-->
+				<ListView x:Name="UiElement_UiaNodeDetailsListView"
+				  SelectionMode="Single"
+				  BorderBrush="Gray" BorderThickness="1">
+					<ListView.ItemTemplate>
+						<DataTemplate x:DataType="models:UiaTreeEntryDetails">
+							<Grid Padding="10">
+								<!-- In the Grid tag:  ="{x:Bind (models:UiaTreeEntryDetails.IsSelected) ? 'LightBlue' : 'Transparent'}"-->
+								<TextBlock Text="{x:Bind Value}" FontSize="16"/>
+							</Grid>
+						</DataTemplate>
+					</ListView.ItemTemplate>
+				</ListView>
 			</Border>
 		</Grid>
 	</Grid>
