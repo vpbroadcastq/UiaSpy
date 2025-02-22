@@ -32,19 +32,26 @@
 					<ColumnDefinition Width="*"/>
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
-				<TextBox Grid.Column="0" x:Name="pathToExe" Text="{x:Bind Path=ExePath.Value, Mode=TwoWay}" PlaceholderText="Path to executable" AcceptsReturn="false"/>
-				<Button Grid.Column="1" x:Name="browseExePath" Click="browseButton_Click" Content="Browse..."/>
-				<Button Grid.Column="2" x:Name="launchExe" Click="launchExeButton_Click" Content="Run and attach"/>
+				<TextBox Grid.Column="0" x:Name="pathToExe" Text="{x:Bind Path=ExePath.Value, Mode=TwoWay}"
+						 PlaceholderText="Path to executable" AcceptsReturn="false" CornerRadius="0"/>
+				<Button Grid.Column="1" x:Name="UiElement_BrowseExePathButton" Click="UiElement_BrowseExePathButton_Click"
+						CornerRadius="0" Content="Browse..."/>
+				<Button Grid.Column="2" x:Name="UiElement_LaunchExeButton" Click="UiElement_LaunchExeButton_Click"
+						CornerRadius="0" Content="Run and attach"/>
+				<Button Grid.Column="3" x:Name="UiElement_MyButton" Click="UiElement_MyButton_Click" Content="Click Me"
+						CornerRadius="0"/>
 			</Grid>
 		</Grid>
 		<Grid Grid.Row="2">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="400"/> <!-- TreeView -->
-				<ColumnDefinition Width="Auto"/> <!-- Element details -->
+				<ColumnDefinition Width="*"/> <!-- Element details -->
 			</Grid.ColumnDefinitions>
-			<Border Grid.Column="0" BorderBrush="Black" BorderThickness="2" CornerRadius="5" Padding="5">
-				<TreeView x:Name="UiElement_UiaTreeTreeView" ItemsSource="{x:Bind Path=UiaTreeEntries, Mode=OneWay}" SelectionChanged="potato">
+			<Border Grid.Column="0" BorderBrush="LightSkyBlue" BorderThickness="2" CornerRadius="0" Padding="5">
+				<TreeView x:Name="UiElement_UiaTreeTreeView" ItemsSource="{x:Bind Path=UiaTreeEntries, Mode=OneWay}"
+						  SelectionChanged="UiElement_UiaTreeTreeView_selectionChanged" SelectionMode="Single">
 					<TreeView.ItemTemplate>
 						<DataTemplate x:DataType="models:UiaTreeEntry">
 							<TreeViewItem Content="{x:Bind Name, Mode=OneWay}" ItemsSource="{x:Bind Children, Mode=OneWay}"/>
@@ -52,9 +59,11 @@
 					</TreeView.ItemTemplate>
 				</TreeView>
 			</Border>
-			<StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-				<Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-			</StackPanel>
+			<Border Grid.Column="1" BorderBrush="DarkRed" BorderThickness="2" CornerRadius="0" Padding="5">
+				<!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+					
+				</StackPanel>-->
+			</Border>
 		</Grid>
 	</Grid>
 </Window>

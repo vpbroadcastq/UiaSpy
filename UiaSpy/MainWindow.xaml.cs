@@ -19,45 +19,54 @@ using Windows.Foundation.Collections;
 using Windows.Storage.Pickers;
 using Windows.Storage;
 using WinRT.Interop;
+using Microsoft.UI.Windowing;
+using Microsoft.UI;
+using System.Runtime.InteropServices;
 
 
 namespace UiaSpy
 {
 	public sealed partial class MainWindow : Window
-    {
+	{
 		public ObservableCollection<Models.UiaTreeEntry> UiaTreeEntries { get; set; } = new();
 		public Models.ExePathViewModel ExePath { get; set; } = new();
 
 		private MainApp _mainApp;
 		private nint _hwnd;
 
-        public MainWindow(MainApp mainApp)
-        {
+		public MainWindow(MainApp mainApp)
+		{
 			_mainApp = mainApp;
 			this.InitializeComponent();
 			_hwnd = WindowNative.GetWindowHandle(this);
+			RemoveRoundedCorners();
 		}
 
-		void potato(object sender, TreeViewSelectionChangedEventArgs e)
+		//
+		// Event handlers for MainWindow UI elements
+		//
+		private void UiElement_UiaTreeTreeView_selectionChanged(object sender, TreeViewSelectionChangedEventArgs e)
 		{
-			object selectedObj = e.AddedItems[0];
-			UiaTreeEntry selectedEntry = selectedObj as UiaTreeEntry;
-			selectedEntry.IsSelected = true;
-		}
-
-		private void myButton_Click(object sender, RoutedEventArgs e)
-        {
-            myButton.Content = "Clicked";
-            //PopulateTree();
-		}
-		private void launchExeButton_Click(object sender, RoutedEventArgs e)
-		{
-			if (LaunchApplication())
+			// It's possible to select multiple elements in a TreeView but I can only display details of one node
+			// at a time.  Should I populate the details of everything selected?
+			// The update to the rhs pane can't tigger from a UiaTreeEntry.IsSelected -> true b/c there could be
+			// multiple of them.  I need to decide _here_ which one to display in the rhs pane if multiple are
+			// selected.
+			if (e.AddedItems.Count == 1)
 			{
-				PopulateTree();
+				object selectedObj = e.AddedItems[0];
+				UiaTreeEntry selectedEntry = (UiaTreeEntry)selectedObj;
+				selectedEntry.IsSelected = true;
+				return;
+			}
+			else if (e.RemovedItems.Count == 1)
+			{
+				object deselectedObj = e.RemovedItems[0];
+				UiaTreeEntry selectedEntry = (UiaTreeEntry)deselectedObj;
+				selectedEntry.IsSelected = false;
 			}
 		}
-		private async void browseButton_Click(object sender, RoutedEventArgs e)
+		private async void UiElement_BrowseExePathButton_Click(object sender, RoutedEventArgs e)
 		{
 			FileOpenPicker filePicker = new FileOpenPicker();
 			InitializeWithWindow.Initialize(filePicker, _hwnd);
@@ -70,6 +79,35 @@ namespace UiaSpy
 				ExePath.Value = file.Path;
 			}
 		}
+		private void UiElement_MyButton_Click(object sender, RoutedEventArgs e)
+		{
+			UiElement_MyButton.Content = "Clicked";
+			//PopulateTree();
+		}
+		private void UiElement_LaunchExeButton_Click(object sender, RoutedEventArgs e)
+		{
+			if (LaunchApplication())
+			{
+				PopulateTree();
+			}
+		}
+
+		//
+		// Styling
+		//
+		[DllImport("dwmapi.dll")]
+		private static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
+		private void RemoveRoundedCorners()
+		{
+			IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+			const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+			int DWMWCP_DONOTROUND = 1; // Forces square corners
+			DwmSetWindowAttribute(hWnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref DWMWCP_DONOTROUND, sizeof(int));
+		}
+
+		//
+		// Things that should probably not live on MainWindow
+		//
 		private bool LaunchApplication()
 		{
 			try
@@ -99,12 +137,12 @@ namespace UiaSpy
 			await dialog.ShowAsync();
 		}
 		private void PopulateTree()
-        {
+		{
 			FlaUI.Core.AutomationElements.Window windowAe = _mainApp.AttachedApp.GetMainWindow(_mainApp.Automation);
 			FlaUI.Core.ITreeWalker tw = _mainApp.Automation.TreeWalkerFactory.GetRawViewWalker();
 
 			UiaTreeEntry windowEntry = new UiaTreeEntry(windowAe);
-            UiaTreeEntries.Add(windowEntry);
+			UiaTreeEntries.Add(windowEntry);
 			
 			dfs(tw, windowEntry);
 		}
