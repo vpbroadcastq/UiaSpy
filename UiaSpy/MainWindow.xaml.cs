@@ -23,7 +23,7 @@ using WinRT.Interop;
 
 namespace UiaSpy
 {
-    public sealed partial class MainWindow : Window
+	public sealed partial class MainWindow : Window
     {
 		public ObservableCollection<Models.UiaTreeEntry> UiaTreeEntries { get; set; } = new();
 		public Models.ExePathViewModel ExePath { get; set; } = new();
@@ -38,7 +38,14 @@ namespace UiaSpy
 			_hwnd = WindowNative.GetWindowHandle(this);
 		}
 
-        private void myButton_Click(object sender, RoutedEventArgs e)
+		void potato(object sender, TreeViewSelectionChangedEventArgs e)
+		{
+			object selectedObj = e.AddedItems[0];
+			UiaTreeEntry selectedEntry = selectedObj as UiaTreeEntry;
+			selectedEntry.IsSelected = true;
+		}
+
+		private void myButton_Click(object sender, RoutedEventArgs e)
         {
             myButton.Content = "Clicked";
             //PopulateTree();

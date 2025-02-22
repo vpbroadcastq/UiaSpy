@@ -8,20 +8,15 @@ using System.Threading.Tasks;
 
 namespace UiaSpy.Models
 {
-	public class ExePathViewModel : INotifyPropertyChanged
+	public class UiaTreeEntryDetails : INotifyPropertyChanged
 	{
-		private string _value = "C:\\Program Files\\Microsoft Office\\root\\Office16\\ONENOTE.EXE";
+		private string _value = "No value :(";
 		public event PropertyChangedEventHandler PropertyChanged = delegate { };
-
-		public ExePathViewModel()
-		{
-			//Value = "D:\\bin\\BabelPad.exe";
-		}
-
 		public string Value
 		{
 			get { return _value; }
-			set {
+			set
+			{
 				_value = value;
 				OnPropertyChanged();
 			}
