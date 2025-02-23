@@ -71,7 +71,7 @@
 						<DataTemplate x:DataType="models:UiaTreeEntryDetails">
 							<Grid Padding="10">
 								<!-- In the Grid tag:  ="{x:Bind (models:UiaTreeEntryDetails.IsSelected) ? 'LightBlue' : 'Transparent'}"-->
-								<TextBlock Text="{x:Bind Value}" FontSize="16"/>
+								<TextBlock Text="{x:Bind Display}" FontSize="16"/>
 							</Grid>
 						</DataTemplate>
 					</ListView.ItemTemplate>

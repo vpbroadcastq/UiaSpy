@@ -84,6 +84,9 @@ namespace UiaSpy
 		private void UiElement_MyButton_Click(object sender, RoutedEventArgs e)
 		{
 			UiElement_MyButton.Content = "Clicked";
+			Scribbler scrib = new Scribbler();
+			System.Drawing.Rectangle rect = new(3007, 337, 1671, 893);
+			scrib.DrawRect(rect,System.Drawing.Color.Blue, TimeSpan.FromMilliseconds(2000));
 			//PopulateTree();
 		}
 		private void UiElement_LaunchExeButton_Click(object sender, RoutedEventArgs e)
