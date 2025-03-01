@@ -4,6 +4,7 @@ using System.Linq;
 using System.ComponentModel;
 using FlaUI.Core;
 using FlaUI.Core.Identifiers;
+using System;
 
 namespace UiaSpy.Models
 {
@@ -12,7 +13,9 @@ namespace UiaSpy.Models
 		public FlaUI.Core.AutomationElements.AutomationElement Element { get; set; }
 		private string _name;
 		private bool _isSelected = false;
+		private bool _isExpanded = false;
 		public event PropertyChangedEventHandler PropertyChanged;
+		private Action<FlaUI.Core.AutomationElements.AutomationElement, FlaUI.Core.Definitions.StructureChangeType, int[]> StructureChangedHandler;
 		protected void OnPropertyChanged(string propertyName) =>
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
@@ -45,13 +48,55 @@ namespace UiaSpy.Models
 			get { return _isSelected; }
 			set
 			{
+				// TODO:  Do i not have any way to mark as no longer selected?
 				if (_isSelected == value) { return; }
-				LoadItemDetails();
-				_isSelected = true;
+				if (value == true)
+				{
+					LoadItemDetails();
+					_isSelected = true;
+				}
+				else
+				{
+					_isSelected = false;
+					// TODO:  Should there be an UnloadItemDetails to force refetching should this element become
+					// selected again?
+				}
 				OnPropertyChanged(nameof(_isSelected));  // What is the correct arg?
 			}
 		}
-
+		public bool IsExpanded
+		{
+			get { return _isExpanded; }
+			set
+			{
+				if (_isExpanded == value) { return; }
+				_isExpanded = value;
+				if (value == true)
+				{
+					RegisterForStructureChangedEvents();
+				}
+				else
+				{
+					UnregisterForStructureChangedEvents();
+				}
+				OnPropertyChanged(nameof(_isExpanded));  // What is the correct arg?
+			}
+		}
+		private void RegisterForStructureChangedEvents()
+		{
+			Element.RegisterStructureChangedEvent(FlaUI.Core.Definitions.TreeScope.Element, this.StructureChangedHandler);
+		}
+		private void UnregisterForStructureChangedEvents()
+		{
+			// FrameworkAutomationElement has an UnregisterStructureChangedEventHandler but AutomationElement
+			// doesn't expose it???
+			// Element.UnregisterStructureChangedEventHandler(this.StructureChangedHandler);
+		}
+		private void OnStructureChanged(FlaUI.Core.AutomationElements.AutomationElement element, FlaUI.Core.Definitions.StructureChangeType changeType, int[] runtimeIds)
+		{
+			// This needs to be somehow communicated to the UI
+			Children = new ObservableCollection<UiaTreeEntry>();
+		}
 		private void LoadItemDetails()
 		{
 			Details.Add(new UiaTreeEntryDetails("ToString()", Element.ToString()));
@@ -91,6 +136,7 @@ namespace UiaSpy.Models
 		public UiaTreeEntry(FlaUI.Core.AutomationElements.AutomationElement e)
 		{
 			Element = e;
+			StructureChangedHandler = OnStructureChanged;
 			Children = new ObservableCollection<UiaTreeEntry>();
 			Details = new ObservableCollection<UiaTreeEntryDetails>();
 		}

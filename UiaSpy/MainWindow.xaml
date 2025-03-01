@@ -51,7 +51,8 @@
 			</Grid.ColumnDefinitions>
 			<Border Grid.Column="0" BorderBrush="LightSkyBlue" BorderThickness="2" CornerRadius="0" Padding="5">
 				<TreeView x:Name="UiElement_UiaTreeTreeView" ItemsSource="{x:Bind Path=UiaTreeEntries, Mode=OneWay}"
-						  SelectionChanged="UiElement_UiaTreeTreeView_selectionChanged" SelectionMode="Single">
+						  SelectionChanged="UiElement_UiaTreeTreeView_selectionChanged" SelectionMode="Single"
+						  Expanding="UiElement_UiaTreeTreeView_Expanding" Collapsed="UiElement_UiaTreeTreeView_Collapsed">
 					<TreeView.ItemTemplate>
 						<DataTemplate x:DataType="models:UiaTreeEntry">
 							<TreeViewItem Content="{x:Bind Name, Mode=OneWay}" ItemsSource="{x:Bind Children, Mode=OneWay}"/>
