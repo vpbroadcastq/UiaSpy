@@ -52,21 +52,32 @@ namespace UiaSpy
 			// The update to the rhs pane can't tigger from a UiaTreeEntry.IsSelected -> true b/c there could be
 			// multiple of them.  I need to decide _here_ which one to display in the rhs pane if multiple are
 			// selected.
+			if (e.RemovedItems.Count == 1)
+			{
+				object deselectedObj = e.RemovedItems[0];
+				UiaTreeEntry selectedEntry = (UiaTreeEntry)deselectedObj;
+				selectedEntry.IsSelected = false;
+				UiElement_UiaNodeDetailsListView.ItemsSource = null;
+			}
 			if (e.AddedItems.Count == 1)
 			{
 				object selectedObj = e.AddedItems[0];
 				UiaTreeEntry selectedEntry = (UiaTreeEntry)selectedObj;
 				selectedEntry.IsSelected = true;
 				UiElement_UiaNodeDetailsListView.ItemsSource = selectedEntry.Details;
-				return;
 			}
-			else if (e.RemovedItems.Count == 1)
-			{
-				object deselectedObj = e.RemovedItems[0];
-				UiaTreeEntry selectedEntry = (UiaTreeEntry)deselectedObj;
-				selectedEntry.IsSelected = false;
-			}
-			UiElement_UiaNodeDetailsListView.ItemsSource = null;
+		}
+		private void UiElement_UiaTreeTreeView_Expanding(TreeView sender, TreeViewExpandingEventArgs args)
+		{
+			UiaTreeEntry expandingItem = (UiaTreeEntry)args.Item;
+			expandingItem.IsExpanded = true;
+			return;
+		}
+		private void UiElement_UiaTreeTreeView_Collapsed(TreeView sender, TreeViewCollapsedEventArgs args)
+		{
+			UiaTreeEntry collapsingItem = (UiaTreeEntry)args.Item;
+			collapsingItem.IsExpanded = false;
+			return;
 		}
 		private async void UiElement_BrowseExePathButton_Click(object sender, RoutedEventArgs e)
 		{
