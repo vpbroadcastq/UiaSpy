@@ -17,6 +17,9 @@ namespace UiaSpy.Models
 		private bool _isExpanded = false;
 		public event PropertyChangedEventHandler PropertyChanged;
 		private Action<FlaUI.Core.AutomationElements.AutomationElement, FlaUI.Core.Definitions.StructureChangeType, int[]> StructureChangedHandler;
+		public ObservableCollection<UiaTreeEntry> Children { get; set; }
+		public ObservableCollection<UiaTreeEntryDetails> Details { get; set; }
+
 		protected void OnPropertyChanged(string propertyName) =>
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
@@ -117,6 +120,7 @@ namespace UiaSpy.Models
 			// Properties
 			//
 			CacheRequest cr = new CacheRequest();
+
 			cr.TreeScope = FlaUI.Core.Definitions.TreeScope.Element;
 			cr.Add(Element.Automation.PropertyLibrary.Element.AutomationId);
 			cr.Add(Element.Automation.PropertyLibrary.Element.Name);
@@ -155,9 +159,6 @@ namespace UiaSpy.Models
 				Details.Add(new UiaTreeEntryDetails("AccessKey", cachedElem.Properties.AccessKey.ToString()));
 			}
 		}
-
-		public ObservableCollection<UiaTreeEntry> Children {get; set;}
-		public ObservableCollection<UiaTreeEntryDetails> Details { get; set; }
 
 		public UiaTreeEntry(FlaUI.Core.AutomationElements.AutomationElement e)
 		{
