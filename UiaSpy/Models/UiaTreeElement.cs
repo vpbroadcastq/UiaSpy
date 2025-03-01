@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.ComponentModel;
 using FlaUI.Core;
 using FlaUI.Core.Identifiers;
-using System;
+using FlaUI.Core.Conditions;
 
 namespace UiaSpy.Models
 {
@@ -115,19 +116,44 @@ namespace UiaSpy.Models
 			//
 			// Properties
 			//
-			Details.Add(new UiaTreeEntryDetails("AutomationId", Element.Properties.AutomationId.ToString()));
-			Details.Add(new UiaTreeEntryDetails("Name", Element.Properties.Name.ToString()));
-			Details.Add(new UiaTreeEntryDetails("ClassName", Element.Properties.ClassName.ToString()));
-			Details.Add(new UiaTreeEntryDetails("ControlType", Element.Properties.ControlType.ToString()));
-			Details.Add(new UiaTreeEntryDetails("LocalizedControlType", Element.Properties.LocalizedControlType.ToString()));
-			Details.Add(new UiaTreeEntryDetails("FrameworkType", Element.FrameworkType.ToString()));
-			Details.Add(new UiaTreeEntryDetails("FrameworkId", Element.Properties.FrameworkId.ToString()));
-			Details.Add(new UiaTreeEntryDetails("ProcessId", Element.Properties.ProcessId.ToString()));
-			Details.Add(new UiaTreeEntryDetails("IsEnabled", Element.Properties.IsEnabled.ToString()));
-			Details.Add(new UiaTreeEntryDetails("IsOffscreen", Element.Properties.IsOffscreen.ToString()));
-			Details.Add(new UiaTreeEntryDetails("BoundingRectangle", Element.Properties.BoundingRectangle.ToString()));
-			Details.Add(new UiaTreeEntryDetails("HelpText", Element.Properties.HelpText.ToString()));
-			Details.Add(new UiaTreeEntryDetails("IsPassword", Element.Properties.IsPassword.ToString()));
+			CacheRequest cr = new CacheRequest();
+			cr.TreeScope = FlaUI.Core.Definitions.TreeScope.Element;
+			cr.Add(Element.Automation.PropertyLibrary.Element.AutomationId);
+			cr.Add(Element.Automation.PropertyLibrary.Element.Name);
+			cr.Add(Element.Automation.PropertyLibrary.Element.ClassName);
+			cr.Add(Element.Automation.PropertyLibrary.Element.ControlType);
+			cr.Add(Element.Automation.PropertyLibrary.Element.LocalizedControlType);
+			cr.Add(Element.Automation.PropertyLibrary.Element.FrameworkId);
+			cr.Add(Element.Automation.PropertyLibrary.Element.ProcessId);
+			cr.Add(Element.Automation.PropertyLibrary.Element.IsEnabled);
+			cr.Add(Element.Automation.PropertyLibrary.Element.IsOffscreen);
+			cr.Add(Element.Automation.PropertyLibrary.Element.BoundingRectangle);
+			cr.Add(Element.Automation.PropertyLibrary.Element.HelpText);
+			cr.Add(Element.Automation.PropertyLibrary.Element.IsPassword);
+			cr.Add(Element.Automation.PropertyLibrary.Element.ControlType);
+			cr.Add(Element.Automation.PropertyLibrary.Element.Culture);
+			cr.Add(Element.Automation.PropertyLibrary.Element.AcceleratorKey);
+			cr.Add(Element.Automation.PropertyLibrary.Element.AccessKey);
+			using (cr.Activate())
+			{
+				var cachedElem = Element.FindFirst(FlaUI.Core.Definitions.TreeScope.Element, FlaUI.Core.Conditions.TrueCondition.Default);
+				Details.Add(new UiaTreeEntryDetails("AutomationId", cachedElem.Properties.AutomationId.ToString()));
+				Details.Add(new UiaTreeEntryDetails("Name", cachedElem.Properties.Name.ToString()));
+				Details.Add(new UiaTreeEntryDetails("ClassName", cachedElem.Properties.ClassName.ToString()));
+				Details.Add(new UiaTreeEntryDetails("ControlType", cachedElem.Properties.ControlType.ToString()));
+				Details.Add(new UiaTreeEntryDetails("LocalizedControlType", cachedElem.Properties.LocalizedControlType.ToString()));
+				Details.Add(new UiaTreeEntryDetails("FrameworkId", cachedElem.Properties.FrameworkId.ToString()));
+				Details.Add(new UiaTreeEntryDetails("ProcessId", cachedElem.Properties.ProcessId.ToString()));
+				Details.Add(new UiaTreeEntryDetails("IsEnabled", cachedElem.Properties.IsEnabled.ToString()));
+				Details.Add(new UiaTreeEntryDetails("IsOffscreen", cachedElem.Properties.IsOffscreen.ToString()));
+				Details.Add(new UiaTreeEntryDetails("BoundingRectangle", cachedElem.Properties.BoundingRectangle.ToString()));
+				Details.Add(new UiaTreeEntryDetails("HelpText", cachedElem.Properties.HelpText.ToString()));
+				Details.Add(new UiaTreeEntryDetails("IsPassword", cachedElem.Properties.IsPassword.ToString()));
+				Details.Add(new UiaTreeEntryDetails("ControlType", cachedElem.Properties.ControlType.ToString()));
+				Details.Add(new UiaTreeEntryDetails("Culture", cachedElem.Properties.Culture.ToString()));
+				Details.Add(new UiaTreeEntryDetails("AcceleratorKey", cachedElem.Properties.AcceleratorKey.ToString()));
+				Details.Add(new UiaTreeEntryDetails("AccessKey", cachedElem.Properties.AccessKey.ToString()));
+			}
 		}
 
 		public ObservableCollection<UiaTreeEntry> Children {get; set;}
