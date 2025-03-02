@@ -30,7 +30,7 @@ namespace UiaSpy
 	{
 		public ObservableCollection<Models.UiaTreeEntry> UiaTreeEntries { get; set; } = new();
 		public Models.ExePathViewModel ExePath { get; set; } = new();
-
+		private static Microsoft.UI.Dispatching.DispatcherQueue _dispatcherQueue;
 		private MainApp _mainApp;
 		private nint _hwnd;
 
@@ -39,6 +39,7 @@ namespace UiaSpy
 			_mainApp = mainApp;
 			this.InitializeComponent();
 			_hwnd = WindowNative.GetWindowHandle(this);
+			_dispatcherQueue = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
 			RemoveRoundedCorners();
 		}
 
@@ -98,7 +99,6 @@ namespace UiaSpy
 			Scribbler scrib = new Scribbler();
 			System.Drawing.Rectangle rect = new(3007, 337, 1671, 893);
 			scrib.DrawRect(rect,System.Drawing.Color.Blue, TimeSpan.FromMilliseconds(2000));
-			//PopulateTree();
 		}
 		private void UiElement_LaunchExeButton_Click(object sender, RoutedEventArgs e)
 		{
@@ -107,6 +107,11 @@ namespace UiaSpy
 				PopulateTree();
 			}
 		}
+
+		//
+		// Getters
+		//
+		public static Microsoft.UI.Dispatching.DispatcherQueue GetUIThreadDispatcher() => _dispatcherQueue;
 
 		//
 		// Styling
@@ -157,7 +162,7 @@ namespace UiaSpy
 			FlaUI.Core.AutomationElements.Window windowAe = _mainApp.AttachedApp.GetMainWindow(_mainApp.Automation);
 			FlaUI.Core.ITreeWalker tw = _mainApp.Automation.TreeWalkerFactory.GetRawViewWalker();
 
-			UiaTreeEntry windowEntry = new UiaTreeEntry(windowAe);
+			UiaTreeEntry windowEntry = new UiaTreeEntry(windowAe, _dispatcherQueue);
 			UiaTreeEntries.Add(windowEntry);
 			
 			dfs(tw, windowEntry);
@@ -167,7 +172,7 @@ namespace UiaSpy
 			FlaUI.Core.AutomationElements.AutomationElement currAe = tw.GetFirstChild(prevEntry.Element);
 			while (currAe != null)
 			{
-				UiaTreeEntry currEntry = new UiaTreeEntry(currAe);
+				UiaTreeEntry currEntry = new UiaTreeEntry(currAe, _dispatcherQueue);
 				prevEntry.Children.Add(currEntry);
 				dfs(tw, currEntry);
 				currAe = tw.GetNextSibling(currAe);

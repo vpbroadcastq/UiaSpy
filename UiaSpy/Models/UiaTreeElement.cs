@@ -6,6 +6,7 @@ using System.ComponentModel;
 using FlaUI.Core;
 using FlaUI.Core.Identifiers;
 using FlaUI.Core.Conditions;
+using System.DirectoryServices;
 
 namespace UiaSpy.Models
 {
@@ -15,10 +16,20 @@ namespace UiaSpy.Models
 		private string _name;
 		private bool _isSelected = false;
 		private bool _isExpanded = false;
+		private Microsoft.UI.Dispatching.DispatcherQueue _mainWindowDq;
 		public event PropertyChangedEventHandler PropertyChanged;
 		private Action<FlaUI.Core.AutomationElements.AutomationElement, FlaUI.Core.Definitions.StructureChangeType, int[]> StructureChangedHandler;
 		public ObservableCollection<UiaTreeEntry> Children { get; set; }
 		public ObservableCollection<UiaTreeEntryDetails> Details { get; set; }
+
+		public UiaTreeEntry(FlaUI.Core.AutomationElements.AutomationElement e, Microsoft.UI.Dispatching.DispatcherQueue dq)
+		{
+			Element = e;
+			_mainWindowDq = dq;
+			StructureChangedHandler = OnStructureChanged;
+			Children = new ObservableCollection<UiaTreeEntry>();
+			Details = new ObservableCollection<UiaTreeEntryDetails>();
+		}
 
 		protected void OnPropertyChanged(string propertyName) =>
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -98,9 +109,13 @@ namespace UiaSpy.Models
 		}
 		private void OnStructureChanged(FlaUI.Core.AutomationElements.AutomationElement element, FlaUI.Core.Definitions.StructureChangeType changeType, int[] runtimeIds)
 		{
-			// This needs to be somehow communicated to the UI
-			Children = new ObservableCollection<UiaTreeEntry>();
+			_mainWindowDq.TryEnqueue(() =>
+			{
+				Children.Clear();
+				OnPropertyChanged(nameof(Children));
+			});
 		}
+
 		private void LoadItemDetails()
 		{
 			Details.Add(new UiaTreeEntryDetails("ToString()", Element.ToString()));
@@ -158,14 +173,6 @@ namespace UiaSpy.Models
 				Details.Add(new UiaTreeEntryDetails("AcceleratorKey", cachedElem.Properties.AcceleratorKey.ToString()));
 				Details.Add(new UiaTreeEntryDetails("AccessKey", cachedElem.Properties.AccessKey.ToString()));
 			}
-		}
-
-		public UiaTreeEntry(FlaUI.Core.AutomationElements.AutomationElement e)
-		{
-			Element = e;
-			StructureChangedHandler = OnStructureChanged;
-			Children = new ObservableCollection<UiaTreeEntry>();
-			Details = new ObservableCollection<UiaTreeEntryDetails>();
 		}
 	}
 }
