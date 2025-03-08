@@ -142,7 +142,7 @@ namespace UiaSpy
 				ShowMessage(ex.Message);
 				return false;
 			}
-			System.Threading.Thread.Sleep(3000);
+			System.Threading.Thread.Sleep(2000);
 			return true;
 		}
 		private async void ShowMessage(string msg)
@@ -162,21 +162,8 @@ namespace UiaSpy
 			FlaUI.Core.AutomationElements.Window windowAe = _mainApp.AttachedApp.GetMainWindow(_mainApp.Automation);
 			FlaUI.Core.ITreeWalker tw = _mainApp.Automation.TreeWalkerFactory.GetRawViewWalker();
 
-			UiaTreeEntry windowEntry = new UiaTreeEntry(windowAe, _dispatcherQueue);
+			UiaTreeEntry windowEntry = new UiaTreeEntry(windowAe, _mainApp.Automation, _dispatcherQueue);
 			UiaTreeEntries.Add(windowEntry);
-			
-			dfs(tw, windowEntry);
-		}
-		private void dfs(FlaUI.Core.ITreeWalker tw, UiaTreeEntry prevEntry)
-		{
-			FlaUI.Core.AutomationElements.AutomationElement currAe = tw.GetFirstChild(prevEntry.Element);
-			while (currAe != null)
-			{
-				UiaTreeEntry currEntry = new UiaTreeEntry(currAe, _dispatcherQueue);
-				prevEntry.Children.Add(currEntry);
-				dfs(tw, currEntry);
-				currAe = tw.GetNextSibling(currAe);
-			}
 		}
 	}
 }
