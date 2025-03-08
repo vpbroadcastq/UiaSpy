@@ -17,18 +17,22 @@ namespace UiaSpy.Models
 		private bool _isSelected = false;
 		private bool _isExpanded = false;
 		private Microsoft.UI.Dispatching.DispatcherQueue _mainWindowDq;
+		private FlaUI.UIA3.UIA3Automation _automation;
 		public event PropertyChangedEventHandler PropertyChanged;
 		private Action<FlaUI.Core.AutomationElements.AutomationElement, FlaUI.Core.Definitions.StructureChangeType, int[]> StructureChangedHandler;
 		public ObservableCollection<UiaTreeEntry> Children { get; set; }
 		public ObservableCollection<UiaTreeEntryDetails> Details { get; set; }
 
-		public UiaTreeEntry(FlaUI.Core.AutomationElements.AutomationElement e, Microsoft.UI.Dispatching.DispatcherQueue dq)
+		public UiaTreeEntry(FlaUI.Core.AutomationElements.AutomationElement e, FlaUI.UIA3.UIA3Automation a, Microsoft.UI.Dispatching.DispatcherQueue dq)
 		{
 			Element = e;
 			_mainWindowDq = dq;
+			_automation = a;
 			StructureChangedHandler = OnStructureChanged;
 			Children = new ObservableCollection<UiaTreeEntry>();
 			Details = new ObservableCollection<UiaTreeEntryDetails>();
+
+			PopulateChildren();
 		}
 
 		protected void OnPropertyChanged(string propertyName) =>
@@ -97,9 +101,26 @@ namespace UiaSpy.Models
 				OnPropertyChanged(nameof(_isExpanded));  // What is the correct arg?
 			}
 		}
+
+		private void PopulateChildren()
+		{
+			FlaUI.Core.ITreeWalker tw = _automation.TreeWalkerFactory.GetRawViewWalker();
+			FlaUI.Core.AutomationElements.AutomationElement currAe = tw.GetFirstChild(this.Element);
+			while (currAe != null)
+			{
+				UiaTreeEntry currEntry = new UiaTreeEntry(currAe, _automation, _mainWindowDq);
+				Children.Add(currEntry);
+				currAe = tw.GetNextSibling(currAe);
+			}
+		}
+		private void VerifyAndReorderChildren()
+		{
+			//...
+		}
+
 		private void RegisterForStructureChangedEvents()
 		{
-			Element.RegisterStructureChangedEvent(FlaUI.Core.Definitions.TreeScope.Element, this.StructureChangedHandler);
+			Element.RegisterStructureChangedEvent(FlaUI.Core.Definitions.TreeScope.Children, this.StructureChangedHandler);
 		}
 		private void UnregisterForStructureChangedEvents()
 		{
@@ -109,11 +130,40 @@ namespace UiaSpy.Models
 		}
 		private void OnStructureChanged(FlaUI.Core.AutomationElements.AutomationElement element, FlaUI.Core.Definitions.StructureChangeType changeType, int[] runtimeIds)
 		{
-			_mainWindowDq.TryEnqueue(() =>
+			if (changeType == FlaUI.Core.Definitions.StructureChangeType.ChildRemoved)
 			{
-				Children.Clear();
-				OnPropertyChanged(nameof(Children));
-			});
+				_mainWindowDq.TryEnqueue(() =>
+				{
+					RemoveChild(element);
+					OnPropertyChanged(nameof(Children));
+				});
+			}
+			else if (changeType == FlaUI.Core.Definitions.StructureChangeType.ChildAdded)
+			{
+				_mainWindowDq.TryEnqueue(() =>
+				{
+					AddChild(element);
+					OnPropertyChanged(nameof(Children));
+				});
+			}
+		}
+
+		private void RemoveChild(FlaUI.Core.AutomationElements.AutomationElement element)
+		{
+			foreach (UiaTreeEntry currChild in Children)
+			{
+				if (currChild.Element == element)
+				{
+					Children.Remove(currChild);
+				}
+			}
+		}
+		// Note that given a random element this won't add it in the right place - it will put it at the end
+		// of the array.  The children might need to be resorted afterwards.
+		private void AddChild(FlaUI.Core.AutomationElements.AutomationElement element)
+		{
+			UiaTreeEntry currEntry = new UiaTreeEntry(element, _automation, _mainWindowDq);
+			Children.Add(currEntry);
 		}
 
 		private void LoadItemDetails()
