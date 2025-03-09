@@ -131,11 +131,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="automation.cpp" />
     <ClCompile Include="native.cpp" />
     <ClCompile Include="structure_changed_handler.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="automation.h" />
     <ClInclude Include="structure_changed_handler.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
