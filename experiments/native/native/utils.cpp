@@ -30,7 +30,7 @@ std::string ToString(const BSTR& bstr) {
 	return s;
 }
 
-std::string GetClassName(IUIAutomationElement& p) {
+std::string GetClassName2(IUIAutomationElement& p) {
 	BSTR bstr;  // Do i have to delete this?
 	HRESULT hr = p.get_CurrentClassName(&bstr);
 	return ToString(bstr);
@@ -48,7 +48,8 @@ IUIAutomationTreeWalker* CreateTreeWalker(IUIAutomation& automation, IUIAutomati
 IUIAutomation* InitializeUIAutomation() {
 	IUIAutomation *pAutomation {};
 	CoInitialize(nullptr);
-	[[maybe_unused]] HRESULT hr = CoCreateInstance(__uuidof(CUIAutomation), nullptr, CLSCTX_INPROC_SERVER, __uuidof(IUIAutomation), (void**)&pAutomation);
+	[[maybe_unused]] HRESULT hr = CoCreateInstance(__uuidof(CUIAutomation), nullptr, CLSCTX_INPROC_SERVER,
+		__uuidof(IUIAutomation), (void**)&pAutomation);
 	return pAutomation;
 }
 

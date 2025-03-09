@@ -6,7 +6,7 @@
 namespace dbk {
 
 std::string ToString(const BSTR& bstr);
-std::string GetClassName(IUIAutomationElement&);
+std::string GetClassName2(IUIAutomationElement&);
 
 IUIAutomationTreeWalker* CreateTreeWalker(IUIAutomation& automation, IUIAutomationCondition& condition);
 IUIAutomation* InitializeUIAutomation();

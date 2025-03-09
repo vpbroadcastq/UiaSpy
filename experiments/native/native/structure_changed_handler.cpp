@@ -1,6 +1,10 @@
 #include "structure_changed_handler.h"
 #include "uiautomationclient.h"
 #include "utils.h"
+#include <iostream>
+#include <string>
+#include <vector>
+#include <format>
 
 
 namespace dbk {
@@ -25,6 +29,23 @@ std::string_view ToString(StructureChangeType t) {
 	}
 }
 
+std::string ToString(EVENTID e) {
+	switch (e) {
+		case UIA_ToolTipOpenedEventId:
+			return "ToolTipOpened";
+		case UIA_ToolTipClosedEventId:
+			return "ToolTipClosed";
+		case UIA_Window_WindowOpenedEventId:
+			return "WindowOpened";
+		case UIA_Window_WindowClosedEventId:
+			return "WindowClosed";
+		case UIA_StructureChangedEventId:
+			return "UIA_StructureChangedEventId";
+		default:
+			return std::format("{}", static_cast<int>(e));
+	}
+}
+
 // https://learn.microsoft.com/en-us/windows/win32/api/uiautomationcore/ne-uiautomationcore-structurechangetype
 // Except for ChildAdded, structure-change events are always associated with the container element that holds
 // the children. The ChildAdded event is associated with the element that was just added.
@@ -37,89 +58,59 @@ HRESULT STDMETHODCALLTYPE StructureChangedHandler::HandleStructureChangedEvent(
 													StructureChangeType changeType,
 													SAFEARRAY* pRuntimeID) {
 	std::string s;
-	std::format_to(std::back_insert_iterator(s), "Type={} Sender={}", ToString(changeType), dbk::GetClassName(*pSender));
+	//std::format_to(std::back_insert_iterator(s), "Type={} Sender={}", ToString(changeType), dbk::GetClassName2(*pSender));
+	std::format_to(std::back_insert_iterator(s), "Type={}", ToString(changeType));
+	std::cout << s << std::endl;
 	this->_dest.push_back(s);
 
 	return S_OK;
 }
 
 
+//
+// Event Handler
+//
 
-
-
-
-
-
-EventHandler::EventHandler(): _refCount(1), _eventCount(0) {
+EventHandler::EventHandler(std::vector<std::string>& v) : _refCount(1), _dest(v) {
+	//...
 }
 
-// IUnknown methods.
-ULONG STDMETHODCALLTYPE EventHandler::AddRef() 
-{
-	ULONG ret = InterlockedIncrement(&_refCount);
-	return ret;
+ULONG STDMETHODCALLTYPE EventHandler::AddRef() {
+	++_refCount;
+	return _refCount;
 }
 
-ULONG STDMETHODCALLTYPE EventHandler::Release() 
-{
-	ULONG ret = InterlockedDecrement(&_refCount);
-	if (ret == 0) 
-	{
+ULONG STDMETHODCALLTYPE EventHandler::Release() {
+	--_refCount;
+	if (_refCount == 0) {
 		delete this;
 		return 0;
 	}
-	return ret;
+	return _refCount;
 }
 
-HRESULT STDMETHODCALLTYPE EventHandler::QueryInterface(REFIID riid, void** ppInterface) 
-{
-	if (riid == __uuidof(IUnknown)) 
-		*ppInterface=static_cast<IUIAutomationEventHandler*>(this);
-	else if (riid == __uuidof(IUIAutomationEventHandler)) 
-		*ppInterface=static_cast<IUIAutomationEventHandler*>(this);
-	else 
-	{
-		*ppInterface = NULL;
+HRESULT STDMETHODCALLTYPE EventHandler::QueryInterface(REFIID riid, void** ppInterface) {
+	if (riid == __uuidof(IUnknown)) {
+		*ppInterface = static_cast<IUIAutomationEventHandler*>(this);
+	} else if (riid == __uuidof(IUIAutomationEventHandler)) {
+		*ppInterface = static_cast<IUIAutomationEventHandler*>(this);
+	} else {
+		*ppInterface = nullptr;
 		return E_NOINTERFACE;
 	}
 	this->AddRef();
 	return S_OK;
 }
 
-// IUIAutomationEventHandler methods
-HRESULT STDMETHODCALLTYPE EventHandler::HandleAutomationEvent(IUIAutomationElement * pSender, EVENTID eventID)
-{
-	_eventCount++;
-	switch (eventID) 
-	{
-		case UIA_ToolTipOpenedEventId:
-			wprintf(L">> Event ToolTipOpened Received! (count: %d)\n", _eventCount);
-			break;
-		case UIA_ToolTipClosedEventId:
-			wprintf(L">> Event ToolTipClosed Received! (count: %d)\n", _eventCount);
-			break;
-		case UIA_Window_WindowOpenedEventId:
-			wprintf(L">> Event WindowOpened Received! (count: %d)\n", _eventCount);
-			break;
-		case UIA_Window_WindowClosedEventId:
-			wprintf(L">> Event WindowClosed Received! (count: %d)\n", _eventCount);
-			break;
-		case UIA_StructureChangedEventId:
-			wprintf(L">> UIA_StructureChangedEventId! (count: %d)\n", _eventCount);
-			break;
-		default:
-			wprintf(L">> Event (%d) Received! (count: %d)\n", eventID, _eventCount);
-			break;
-	}
+HRESULT STDMETHODCALLTYPE EventHandler::HandleAutomationEvent(IUIAutomationElement* pSender, EVENTID eventID) {
+	std::string s;
+	//std::format_to(std::back_insert_iterator(s), "Type={} Sender (ClassName)={}",
+	//	ToString(eventID), dbk::GetClassName2(*pSender));
+	std::format_to(std::back_insert_iterator(s), "Type={}", ToString(eventID));
+	this->_dest.push_back(s);
+	std::cout << s << std::endl;
 	return S_OK;
 }
-
-
-
-
-
-
-
 
 
 
